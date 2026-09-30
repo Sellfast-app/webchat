@@ -1,69 +1,157 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState, useRef, useEffect } from 'react';
+import { Send, MessageCircle, X, Loader2 } from 'lucide-react';
+import { ChatMessage, VendorContext, MOCK_VENDOR } from '@/lib/types';
+
+interface ChatWidgetProps {
+  vendor?: VendorContext;
+}
+
+export default function ChatPage() {
+  return <ChatWidget vendor={MOCK_VENDOR} />;
+}
+
+function ChatWidget({ vendor = MOCK_VENDOR }: ChatWidgetProps) {
+  const [isOpen, setIsOpen] = useState(true);
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      id: '1',
+      role: 'assistant',
+      content: `Hello! Welcome to ${vendor.vendorName}. How can I help you today?`,
+      timestamp: Date.now(),
+      vendorId: vendor.vendorId,
+    },
+  ]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (!input.trim()) return;
+
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: input.trim(),
+      timestamp: Date.now(),
+      vendorId: vendor.vendorId,
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInput('');
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: input.trim(),
+          vendorId: vendor.vendorId,
+          vendorName: vendor.vendorName,
+          businessType: vendor.businessType,
+          products: vendor.products,
+        }),
+      });
+
+      const data = await response.json();
+
+      const assistantMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: data.reply || 'Sorry, I could not process your request.',
+        timestamp: Date.now() + 1,
+        vendorId: vendor.vendorId,
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch {
+      const errorMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: "Sorry, I'm having trouble connecting. Please try again.",
+        timestamp: Date.now() + 1,
+        vendorId: vendor.vendorId,
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex h-screen w-full flex-col overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-gray-200">
+      {/* Header */}
+      <div className="flex items-center justify-between bg-primary px-4 py-3">
+        <div className="flex items-center gap-2">
+          <MessageCircle className="h-5 w-5 text-primary-foreground" />
+          <span className="text-sm font-semibold text-primary-foreground">{vendor.vendorName}</span>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+        <button
+          onClick={() => setIsOpen(false)}
+          className="text-primary-foreground hover:text-gray-200"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto bg-gray-50 p-4">
+        {messages.map((msg) => (
+          <div
+            key={msg.id}
+            className={`mb-3 flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <div
+              className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
+                msg.role === 'user'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-white text-gray-900 shadow-sm'
+              }`}
+            >
+              {msg.content}
+            </div>
+          </div>
+        ))}
+        {loading && (
+          <div className="flex justify-start">
+            <div className="rounded-lg bg-white px-3 py-2 shadow-sm">
+              <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input */}
+      <div className="border-t border-gray-200 bg-white p-3">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+            placeholder="Type your message..."
+            className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary"
+          />
+          <button
+            onClick={handleSend}
+            disabled={loading || !input.trim()}
+            className="rounded-lg bg-primary px-3 py-2 text-primary-foreground hover:bg-primary-secondary disabled:opacity-50"
           >
-            Documentation
-          </a>
+            <Send className="h-4 w-4" />
+          </button>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
