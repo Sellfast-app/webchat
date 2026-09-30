@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, MessageCircle, X, Loader2, Image as ImageIcon } from "lucide-react";
+import { Send, X, Loader2, Image as ImageIcon } from "lucide-react";
 import { ChatMessage, VendorContext, MOCK_VENDOR } from "@/lib/types";
 
 function formatTime(ts: number): string {
@@ -16,7 +16,6 @@ interface ChatWidgetProps {
 }
 
 export function ChatWidget({ vendor = MOCK_VENDOR }: ChatWidgetProps) {
-  const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "1",
@@ -104,118 +103,111 @@ export function ChatWidget({ vendor = MOCK_VENDOR }: ChatWidgetProps) {
   };
 
   return (
-    <>
-      {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-primary-foreground shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl"
-        >
-          <MessageCircle className="h-5 w-5" />
-          <span className="text-sm font-medium">Chat with us</span>
-        </button>
-      )}
-
-      {isOpen && (
-        <div className="fixed bottom-6 right-6 flex h-[500px] w-80 flex-col overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-gray-200">
-          {/* Header */}
-          <div className="flex items-center justify-between bg-primary px-4 py-3">
-            <div className="flex items-center gap-2">
-              <img
-                src="/vendor-avatar.jpg"
-                alt="Vendor"
-                className="h-8 w-8 rounded-full object-cover"
-              />
-              <span className="text-sm font-semibold text-primary-foreground">
-                {vendor.vendorName}
-              </span>
-            </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="text-primary-foreground hover:text-gray-200"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto bg-gray-50 p-4">
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`mb-3 flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-              >
-                <div
-                  className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
-                    msg.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-white text-gray-900 shadow-sm"
-                  }`}
-                >
-                  {msg.imageUrl && (
-                    <img
-                      src={msg.imageUrl}
-                      alt="uploaded"
-                      className="mb-1 max-h-40 rounded object-cover"
-                    />
-                  )}
-                  {msg.content !== "[image]" && <span>{msg.content}</span>}
-                  <div
-                    className={`mt-1 text-[10px] ${
-                      msg.role === "user"
-                        ? "text-primary-foreground/70"
-                        : "text-gray-400"
-                    }`}
-                  >
-                    {formatTime(msg.timestamp)}
-                  </div>
-                </div>
-              </div>
-            ))}
-            {loading && (
-              <div className="flex justify-start">
-                <div className="rounded-lg bg-white px-3 py-2 shadow-sm">
-                  <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Input */}
-          <div className="border-t border-gray-200 bg-white p-3">
-            <div className="flex gap-2">
-              <input
-                type="file"
-                ref={fileInputRef}
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageUpload}
-              />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="rounded-lg border border-gray-200 px-2 py-2 text-gray-400 hover:bg-gray-50 hover:text-gray-600"
-              >
-                <ImageIcon className="h-4 w-4" />
-              </button>
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                placeholder="Type your message..."
-                className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary"
-              />
-              <button
-                onClick={handleSend}
-                disabled={loading || !input.trim()}
-                className="rounded-lg bg-primary px-3 py-2 text-primary-foreground hover:bg-primary-secondary disabled:opacity-50"
-              >
-                <Send className="h-4 w-4" />
-              </button>
-            </div>
+    <div className="flex h-screen w-full flex-col bg-gray-50">
+      {/* Header */}
+      <div className="flex items-center justify-between bg-primary px-6 py-4 shadow-sm">
+        <div className="flex items-center gap-3">
+          <img
+            src="/vendor-avatar.jpg"
+            alt="Vendor"
+            className="h-10 w-10 rounded-full object-cover ring-2 ring-primary-foreground/20"
+          />
+          <div>
+            <h2 className="text-base font-semibold text-primary-foreground">
+              {vendor.vendorName}
+            </h2>
+            <p className="text-xs text-primary-foreground/70">
+              {vendor.businessType}
+            </p>
           </div>
         </div>
-      )}
-    </>
+        <a
+          href="/"
+          className="rounded-lg bg-primary-foreground/10 px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary-foreground/20"
+        >
+          Back to Store
+        </a>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-6">
+        <div className="mx-auto max-w-2xl space-y-4">
+          {messages.map((msg) => (
+            <div
+              key={msg.id}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+            >
+              <div
+                className={`max-w-[75%] rounded-xl px-4 py-3 text-sm shadow-sm ${
+                  msg.role === "user"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-white text-gray-900 shadow"
+                }`}
+              >
+                {msg.imageUrl && (
+                  <img
+                    src={msg.imageUrl}
+                    alt="uploaded"
+                    className="mb-2 max-h-60 rounded-lg object-cover"
+                  />
+                )}
+                {msg.content !== "[image]" && <span>{msg.content}</span>}
+                <div
+                  className={`mt-2 text-[10px] ${
+                    msg.role === "user"
+                      ? "text-primary-foreground/70"
+                      : "text-gray-400"
+                  }`}
+                >
+                  {formatTime(msg.timestamp)}
+                </div>
+              </div>
+            </div>
+          ))}
+          {loading && (
+            <div className="flex justify-start">
+              <div className="rounded-xl bg-white px-4 py-3 shadow">
+                <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+      </div>
+
+      {/* Input */}
+      <div className="border-t border-gray-200 bg-white p-4">
+        <div className="mx-auto flex max-w-2xl items-center gap-3">
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept="image/*"
+            className="hidden"
+            onChange={handleImageUpload}
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="rounded-xl border border-gray-200 p-2.5 text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors"
+          >
+            <ImageIcon className="h-5 w-5" />
+          </button>
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSend()}
+            placeholder="Type your message..."
+            className="flex-1 rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+          />
+          <button
+            onClick={handleSend}
+            disabled={loading || !input.trim()}
+            className="rounded-xl bg-primary px-4 py-3 text-primary-foreground hover:bg-primary-secondary disabled:opacity-50 transition-colors"
+          >
+            <Send className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
