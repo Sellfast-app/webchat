@@ -105,28 +105,22 @@ export function ChatWidget({ vendor = MOCK_VENDOR }: ChatWidgetProps) {
   return (
     <div className="flex h-screen w-full flex-col bg-gray-50">
       {/* Header */}
-      <div className="flex items-center justify-between bg-primary px-6 py-4 shadow-sm">
+      <div className="flex items-center justify-between bg-[#4FCA6A] px-6 py-4 shadow-sm">
         <div className="flex items-center gap-3">
           <img
             src="/vendor-avatar.jpg"
             alt="Vendor"
-            className="h-10 w-10 rounded-full object-cover ring-2 ring-primary-foreground/20"
+            className="h-10 w-10 rounded-full object-cover ring-2 ring-white"
           />
           <div>
-            <h2 className="text-base font-semibold text-primary-foreground">
+            <h2 className="text-base font-semibold text-white">
               {vendor.vendorName}
             </h2>
-            <p className="text-xs text-primary-foreground/70">
+            <p className="text-xs text-white/70">
               {vendor.businessType}
             </p>
           </div>
         </div>
-        <a
-          href="/"
-          className="rounded-lg bg-primary-foreground/10 px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary-foreground/20"
-        >
-          Back to Store
-        </a>
       </div>
 
       {/* Messages */}
@@ -189,7 +183,7 @@ export function ChatWidget({ vendor = MOCK_VENDOR }: ChatWidgetProps) {
             onClick={() => fileInputRef.current?.click()}
             className="rounded-xl border border-gray-200 p-2.5 text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors"
           >
-            <ImageIcon className="h-5 w-5" />
+            <ImageIcon className="h-5 w-5 " />
           </button>
           <input
             type="text"
@@ -204,7 +198,7 @@ export function ChatWidget({ vendor = MOCK_VENDOR }: ChatWidgetProps) {
             disabled={loading || !input.trim()}
             className="rounded-xl bg-primary px-4 py-3 text-primary-foreground hover:bg-primary-secondary disabled:opacity-50 transition-colors"
           >
-            <Send className="h-5 w-5" />
+            <Send className="h-5 w-5 text-[#4FCA6A]" />
           </button>
         </div>
       </div>
