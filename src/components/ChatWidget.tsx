@@ -103,6 +103,11 @@ export function ChatWidget({ vendor = MOCK_VENDOR }: ChatWidgetProps) {
           {/* Header */}
           <div className="flex items-center justify-between bg-primary px-4 py-3">
             <div className="flex items-center gap-2">
+              <img
+                src="https://share.google/o7lTig6jyZlqwPniq"
+                alt="Vendor"
+                className="h-8 w-8 rounded-full object-cover"
+              />
               <MessageCircle className="h-5 w-5 text-primary-foreground" />
               <span className="text-sm font-semibold text-primary-foreground">{vendor.vendorName}</span>
             </div>
