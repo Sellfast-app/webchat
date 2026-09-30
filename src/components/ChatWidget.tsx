@@ -1,11 +1,15 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, MessageCircle, X, Loader2 } from 'lucide-react';
+import { Send, MessageCircle, X, Loader2, Image as ImageIcon } from 'lucide-react';
 import { ChatMessage, VendorContext, MOCK_VENDOR } from '@/lib/types';
 
 interface ChatWidgetProps {
   vendor?: VendorContext;
+}
+
+function formatTime(timestamp: number): string {
+  return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 export function ChatWidget({ vendor = MOCK_VENDOR }: ChatWidgetProps) {
@@ -22,6 +26,7 @@ export function ChatWidget({ vendor = MOCK_VENDOR }: ChatWidgetProps) {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -84,6 +89,28 @@ export function ChatWidget({ vendor = MOCK_VENDOR }: ChatWidgetProps) {
     }
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const userMessage: ChatMessage = {
+        id: Date.now().toString(),
+        role: 'user',
+        content: '[image]',
+        timestamp: Date.now(),
+        vendorId: vendor.vendorId,
+        imageUrl: reader.result as string,
+      };
+      setMessages((prev) => [...prev, userMessage]);
+    };
+    reader.readAsDataURL(file);
+
+    // Reset input so user can send another message
+    setInput('');
+  };
+
   return (
     <>
       {/* Chat Toggle Button */}
@@ -132,7 +159,21 @@ export function ChatWidget({ vendor = MOCK_VENDOR }: ChatWidgetProps) {
                       : 'bg-white text-gray-900 shadow-sm'
                   }`}
                 >
-                  {msg.content}
+                  {msg.imageUrl && (
+                    <img
+                      src={msg.imageUrl}
+                      alt="uploaded"
+                      className="mb-1 max-h-40 rounded object-cover"
+                    />
+                  )}
+                  {msg.content !== '[image]' && <span>{msg.content}</span>}
+                  <div
+                    className={`mt-1 text-[10px] ${
+                      msg.role === 'user' ? 'text-primary-foreground/70' : 'text-gray-400'
+                    }`}
+                  >
+                    {formatTime(msg.timestamp)}
+                  </div>
                 </div>
               </div>
             ))}
@@ -149,6 +190,19 @@ export function ChatWidget({ vendor = MOCK_VENDOR }: ChatWidgetProps) {
           {/* Input */}
           <div className="border-t border-gray-200 bg-white p-3">
             <div className="flex gap-2">
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageUpload}
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="rounded-lg border border-gray-200 px-2 py-2 text-gray-400 hover:bg-gray-50 hover:text-gray-600"
+              >
+                <ImageIcon className="h-4 w-4" />
+              </button>
               <input
                 type="text"
                 value={input}
