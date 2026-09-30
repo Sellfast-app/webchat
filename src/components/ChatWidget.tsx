@@ -1,39 +1,38 @@
-'use client';
+"use client";
 
-import { useState, useRef, useEffect } from 'react';
-import { Send, MessageCircle, X, Loader2, Image as ImageIcon } from 'lucide-react';
-import { ChatMessage, VendorContext, MOCK_VENDOR } from '@/lib/types';
+import { useState, useRef, useEffect } from "react";
+import { Send, MessageCircle, X, Loader2, Image as ImageIcon } from "lucide-react";
+import { ChatMessage, VendorContext, MOCK_VENDOR } from "@/lib/types";
+
+function formatTime(ts: number): string {
+  return new Date(ts).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
 interface ChatWidgetProps {
   vendor?: VendorContext;
-}
-
-function formatTime(timestamp: number): string {
-  return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 export function ChatWidget({ vendor = MOCK_VENDOR }: ChatWidgetProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
-      id: '1',
-      role: 'assistant',
+      id: "1",
+      role: "assistant",
       content: `Hello! Welcome to ${vendor.vendorName}. How can I help you today?`,
       timestamp: Date.now(),
       vendorId: vendor.vendorId,
     },
   ]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const handleSend = async () => {
@@ -41,20 +40,19 @@ export function ChatWidget({ vendor = MOCK_VENDOR }: ChatWidgetProps) {
 
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
-      role: 'user',
+      role: "user",
       content: input.trim(),
       timestamp: Date.now(),
       vendorId: vendor.vendorId,
     };
-
     setMessages((prev) => [...prev, userMessage]);
-    setInput('');
+    setInput("");
     setLoading(true);
 
     try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: input.trim(),
           vendorId: vendor.vendorId,
@@ -63,22 +61,19 @@ export function ChatWidget({ vendor = MOCK_VENDOR }: ChatWidgetProps) {
           products: vendor.products,
         }),
       });
-
-      const data = await response.json();
-
+      const data = await res.json();
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: data.reply || 'Sorry, I could not process your request.',
+        role: "assistant",
+        content: data.reply || "Sorry, I could not process your request.",
         timestamp: Date.now() + 1,
         vendorId: vendor.vendorId,
       };
-
       setMessages((prev) => [...prev, assistantMessage]);
     } catch {
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        role: 'assistant',
+        role: "assistant",
         content: "Sorry, I'm having trouble connecting. Please try again.",
         timestamp: Date.now() + 1,
         vendorId: vendor.vendorId,
@@ -92,28 +87,24 @@ export function ChatWidget({ vendor = MOCK_VENDOR }: ChatWidgetProps) {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onloadend = () => {
-      const userMessage: ChatMessage = {
+      const msg: ChatMessage = {
         id: Date.now().toString(),
-        role: 'user',
-        content: '[image]',
+        role: "user",
+        content: "[image]",
         timestamp: Date.now(),
         vendorId: vendor.vendorId,
         imageUrl: reader.result as string,
       };
-      setMessages((prev) => [...prev, userMessage]);
+      setMessages((prev) => [...prev, msg]);
     };
     reader.readAsDataURL(file);
-
-    // Reset input so user can send another message
-    setInput('');
+    setInput("");
   };
 
   return (
     <>
-      {/* Chat Toggle Button */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
@@ -124,7 +115,6 @@ export function ChatWidget({ vendor = MOCK_VENDOR }: ChatWidgetProps) {
         </button>
       )}
 
-      {/* Chat Window */}
       {isOpen && (
         <div className="fixed bottom-6 right-6 flex h-[500px] w-80 flex-col overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-gray-200">
           {/* Header */}
@@ -135,7 +125,9 @@ export function ChatWidget({ vendor = MOCK_VENDOR }: ChatWidgetProps) {
                 alt="Vendor"
                 className="h-8 w-8 rounded-full object-cover"
               />
-              <span className="text-sm font-semibold text-primary-foreground">{vendor.vendorName}</span>
+              <span className="text-sm font-semibold text-primary-foreground">
+                {vendor.vendorName}
+              </span>
             </div>
             <button
               onClick={() => setIsOpen(false)}
@@ -150,13 +142,13 @@ export function ChatWidget({ vendor = MOCK_VENDOR }: ChatWidgetProps) {
             {messages.map((msg) => (
               <div
                 key={msg.id}
-                className={`mb-3 flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`mb-3 flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
                   className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
-                    msg.role === 'user'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-white text-gray-900 shadow-sm'
+                    msg.role === "user"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-white text-gray-900 shadow-sm"
                   }`}
                 >
                   {msg.imageUrl && (
@@ -166,10 +158,12 @@ export function ChatWidget({ vendor = MOCK_VENDOR }: ChatWidgetProps) {
                       className="mb-1 max-h-40 rounded object-cover"
                     />
                   )}
-                  {msg.content !== '[image]' && <span>{msg.content}</span>}
+                  {msg.content !== "[image]" && <span>{msg.content}</span>}
                   <div
                     className={`mt-1 text-[10px] ${
-                      msg.role === 'user' ? 'text-primary-foreground/70' : 'text-gray-400'
+                      msg.role === "user"
+                        ? "text-primary-foreground/70"
+                        : "text-gray-400"
                     }`}
                   >
                     {formatTime(msg.timestamp)}
@@ -207,7 +201,7 @@ export function ChatWidget({ vendor = MOCK_VENDOR }: ChatWidgetProps) {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                onKeyDown={(e) => e.key === "Enter" && handleSend()}
                 placeholder="Type your message..."
                 className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary"
               />
