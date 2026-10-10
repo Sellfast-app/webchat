@@ -1,0 +1,36 @@
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/inter-4.1/InterVariable.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/inter-4.1/InterVariable-Italic.woff2") format("woff2");
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  --font-ui: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-ui);
+    font-optical-sizing: auto;
+  }
+
+  body {
+    font-family: var(--font-ui);
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+
+  button, input, select, textarea {
+    font-family: inherit;
+  }
+}
+
