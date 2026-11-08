@@ -5,6 +5,7 @@ export interface ChatMessage {
   timestamp: number;
   vendorId: string;
   imageUrl?: string;
+  sources?: Array<{ title: string; url: string }>;
 }
 
 export interface VendorContext {

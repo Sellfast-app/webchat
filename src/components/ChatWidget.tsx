@@ -146,6 +146,20 @@ export function ChatWidget({ vendor = MOCK_VENDOR }: ChatWidgetProps) {
                   />
                 )}
                 {msg.content !== "[image]" && <span>{msg.content}</span>}
+                {msg.sources?.length ? (
+                  <div className="mt-3 border-t border-gray-100 pt-2">
+                    <p className="mb-1 text-[10px] font-medium text-gray-500">Web sources</p>
+                    <ul className="space-y-1">
+                      {msg.sources.map((source) => (
+                        <li key={source.url}>
+                          <a href={source.url} target="_blank" rel="noreferrer" className="text-xs text-primary underline underline-offset-2">
+                            {source.title}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
                 <div
                   className={`mt-2 text-[10px] ${
                     msg.role === "user"
