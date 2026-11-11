@@ -12,17 +12,31 @@ export interface VendorContext {
   vendorId: string;
   vendorName: string;
   businessType: string;
-  products: { name: string; price: string }[];
+  logo?: string | null;
+  description?: string | null;
+  currency: string;
+  fulfillmentModes: string[];
+  vendorDeliveryRates: Array<{ id: string; location: string; rate: number }>;
+  catalog: CatalogItem[];
 }
 
-export const MOCK_VENDOR: VendorContext = {
-  vendorId: "fresh-flavours-kitchen",
-  vendorName: "Fresh Flavours Kitchen",
-  businessType: "Food & Restaurant",
-  products: [
-    { name: "Jollof Rice", price: "₦2,500" },
-    { name: "Grilled Chicken", price: "₦3,200" },
-    { name: "Pounded Yam & Egusi", price: "₦2,800" },
-    { name: "Suya Plate", price: "₦1,800" },
-  ],
-};
+export interface CatalogItem {
+  id: string;
+  name: string;
+  description?: string | null;
+  price?: number;
+  image?: string | null;
+  weight?: number;
+  options?: {
+    type?: string;
+    portions?: Array<{ id: string; name: string; price: number }>;
+    servingPrices?: Array<{ servingType: string; price: number }>;
+    addOns?: Array<{ id?: string; name: string; required: boolean; selection: string; maxSelection?: number; options: Array<{ id: string; name: string; price: number }> }>;
+    bundles?: Array<{ id: string; name: string; price: number }>;
+    variants?: Array<Record<string, unknown>>;
+    tickets?: Array<{ id: string; name: string; kind: string; price: number; remaining: number }>;
+    startsAt?: string;
+    endsAt?: string;
+    location?: string;
+  };
+}
